@@ -11,13 +11,13 @@ if(!topic){
  const main=document.getElementById('app');
  main.innerHTML='<section class="quiz-wrap"><a class="back" href="../">← Volver a los 14 cuestionarios</a><div class="panel" id="quiz"><p class="eyebrow" style="color:#8b2424">HOZEGA · BIOLOGÍA · IV BIMESTRE 2026</p><h2>'+esc(topic.title)+'</h2><p class="muted">'+esc(topic.desc)+' · 4.º de secundaria</p><div class="student"><label>Nombre y apellidos<input id="studentName" autocomplete="name" placeholder="Escribe tu nombre completo" required></label><label>Grado y sección<input id="grade" value="4.º" required></label><label>Fecha<input id="date" type="date" required></label></div><p class="muted">Banco de práctica disponible: '+topic.items.length+' preguntas distintas. Se mostrarán todas en este intento. Puntaje y retroalimentación al finalizar cada respuesta.</p><button class="btn" id="start">Comenzar cuestionario</button></div></section>';
  const panel=document.getElementById('quiz');
- const studentData={name:'',grade:'4.º',date:new Date().toISOString().slice(0,10)};
+ const studentData={name:'',grade:'4.º',date:(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})()};
  let selected=[],pos=0,score=0,right=0,wrong=[];
  const levelPoints=[1,2,3];
  function start(){
   studentData.name=document.getElementById('studentName').value.trim();
   studentData.grade=document.getElementById('grade').value.trim()||'4.º';
-  studentData.date=document.getElementById('date').value||new Date().toISOString().slice(0,10);
+  studentData.date=document.getElementById('date').value||(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
   if(!studentData.name){alert('Escribe tu nombre y apellidos.');return;}
   selected=shuffle(topic.items.map((it,i)=>({id:i,q:it[0],opts:it[1],ans:it[2],why:it[3],level:i<2?0:i<4?1:2})));
   pos=0;score=0;right=0;wrong=[];show();
