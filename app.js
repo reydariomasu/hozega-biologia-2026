@@ -9,15 +9,18 @@ if(!topic){
 }else{
  document.title=topic.title+' | HOZEGA 2026';
  const main=document.getElementById('app');
- main.innerHTML='<section class="quiz-wrap"><a class="back" href="../">← Volver a los 14 cuestionarios</a><div class="panel" id="quiz"><p class="eyebrow" style="color:#8b2424">HOZEGA · BIOLOGÍA · IV BIMESTRE 2026</p><h2>'+esc(topic.title)+'</h2><p class="muted">'+esc(topic.desc)+' · 4.º de secundaria</p><div class="student"><label>Nombre y apellidos<input id="studentName" autocomplete="name" placeholder="Escribe tu nombre completo" required></label><label>Grado y sección<input id="grade" value="4.º" required></label><label>Fecha<input id="date" type="date" required></label></div><p class="muted">Banco de práctica disponible: '+topic.items.length+' preguntas distintas. Se mostrarán todas en este intento. Puntaje y retroalimentación al finalizar cada respuesta.</p><button class="btn" id="start">Comenzar cuestionario</button></div></section>';
+ main.innerHTML='<section class="quiz-wrap"><a class="back" href="../">← Volver a los 14 cuestionarios</a><div class="panel" id="quiz"><p class="eyebrow" style="color:#8b2424">HOZEGA · BIOLOGÍA · IV BIMESTRE 2026</p><h2>'+esc(topic.title)+'</h2><p class="muted">'+esc(topic.desc)+' · 4.º de secundaria</p><div class="student"><label>Nombre y apellidos<input id="studentName" autocomplete="name" placeholder="Escribe tu nombre completo" required></label><label>Grado y sección<input id="grade" value="4.º A" required></label><label>Fecha<input id="date" type="date" required></label></div><p class="muted">Banco de práctica disponible: '+topic.items.length+' preguntas distintas. Se mostrarán todas en este intento. Puntaje y retroalimentación al finalizar cada respuesta.</p><button class="btn" id="start">Comenzar cuestionario</button></div></section>';
  const panel=document.getElementById('quiz');
  const studentData={name:'',grade:'4.º',date:(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})()};
- let selected=[],pos=0,score=0,right=0,wrong=[];
+ let selected=[],pos=0,score=0,right=0,wrong=[],attempts=0;
  const levelPoints=[1,2,3];
  function start(){
-  studentData.name=document.getElementById('studentName').value.trim();
-  studentData.grade=document.getElementById('grade').value.trim()||'4.º';
-  studentData.date=document.getElementById('date').value||(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
+  if(attempts>=2){alert('Has utilizado los dos intentos disponibles.');return;}
+  attempts++;
+  const nameField=document.getElementById('studentName'),gradeField=document.getElementById('grade'),dateField=document.getElementById('date');
+  if(nameField)studentData.name=nameField.value.trim();
+  if(gradeField)studentData.grade=gradeField.value.trim()||'4.º A';
+  if(dateField)studentData.date=dateField.value||(()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')})();
   if(!studentData.name){alert('Escribe tu nombre y apellidos.');return;}
   selected=shuffle(topic.items.map((it,i)=>({id:i,q:it[0],opts:it[1],ans:it[2],why:it[3],level:i<2?0:i<4?1:2})));
   pos=0;score=0;right=0;wrong=[];show();
@@ -48,7 +51,7 @@ if(!topic){
   const pct=Math.round(score/max*100),level=pct>=90?'Logro destacado':pct>=70?'Logro esperado':pct>=50?'En proceso':'En inicio';
   panel.innerHTML='<div class="result"><p class="eyebrow" style="color:#8b2424">RESULTADO DEL CUESTIONARIO</p><h2>'+esc(topic.title)+'</h2><p>'+esc(studentData.name)+'</p><p class="muted">'+esc(studentData.grade)+' · '+esc(studentData.date)+'</p><div class="score">'+score+'/'+max+'</div><h3>'+level+'</h3><p>'+pct+'% · '+right+' correctas · '+(selected.length-right)+' incorrectas</p><p class="muted">Resultado calculado en este dispositivo. No se envía automáticamente al docente ni se guarda en un servidor.</p><button class="btn" id="review">Revisar errores ('+wrong.length+')</button> <button class="btn" id="again">Nuevo intento</button> <button class="btn" id="print">Imprimir resultado</button><div id="reviewBox"></div></div>';
   document.getElementById('review').onclick=()=>{document.getElementById('reviewBox').innerHTML=wrong.length?wrong.map((x,i)=>'<div class="feedback bad"><b>'+(i+1)+'. '+esc(x.q)+'</b><p>Tu respuesta: '+esc(x.chosen)+'</p><p>Respuesta correcta: '+esc(x.answer)+'</p><p>'+esc(x.why)+'</p></div>').join(''):'<p>¡Excelente! No registraste errores.</p>';};
-  document.getElementById('again').onclick=()=>location.reload();
+  document.getElementById('again').textContent=attempts<2?'Realizar segundo intento':'Intentos completados';document.getElementById('again').disabled=attempts>=2;document.getElementById('again').onclick=()=>{if(attempts<2){panel.innerHTML='<p class="eyebrow" style="color:#8b2424">SEGUNDO INTENTO</p><h2>'+esc(topic.title)+'</h2><p>Se conservarán los datos del estudiante y se mezclarán nuevamente las preguntas y alternativas.</p><button class="btn" id="startAgain">Comenzar segundo intento</button>';document.getElementById('startAgain').onclick=start;}};
   document.getElementById('print').onclick=()=>window.print();
  }
 }
